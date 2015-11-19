@@ -1,12 +1,12 @@
 imports System.Threading
-module exemplo
-#region "VARIAVEIS"
-	dim threadDisparo as Thread
-	dim saida as boolean = false
-	dim pontos as integer = 0
+module spaceInvader
+#region "Global Variables"
+	dim threadShot as Thread
+	dim exit as boolean = false
+	dim score as integer = 0
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	dim timerProj as System.Timers.Timer
-	dim timerInimigo as System.Timers.Timer
+	dim timerBullet as System.Timers.Timer
+	dim timerEnemy as System.Timers.Timer
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
 	dim mapCol as integer = 40
 	dim mapLin as integer = 20
@@ -19,34 +19,34 @@ module exemplo
 	dim pPosOld as integer = 0
 	dim pLin as integer = 17
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	dim projChar as char = "!"
-	dim projPos as integer
-	dim projPosOld as integer
-	dim projCol as integer
+	dim bulletChar as char = "!"
+	dim bulletPos as integer
+	dim bulletPosOld as integer
+	dim bulletCol as integer
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	structure tipoInimigo
+	structure typeEnemy
 		dim Pos as integer
 		dim PosOld as integer
 		dim Col as integer
-		dim Atingido as boolean
-		dim Caracter as char
+		dim GotHit as boolean
+		dim EnemyChar as char
 	end structure
-	dim inimigo(10) as tipoInimigo
+	dim pEnemy(10) as typeEnemy
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
 	dim cKey as ConsoleKeyInfo
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	sub desenharPontos()
+	sub drawScore()
 		console.setcursorposition(mapCol + 2,1)
-		console.write("Pontos: " & pontos)
+		console.write("Score: " & score)
 	end sub
 #end region
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	sub desenharMapa()
+	sub drawMap()
 		dim cont,contb as integer
 		console.clear()
 		for cont = 0 to mapCol
 			for contb = 0 to mapLin
-				if cont > 0 and cont < mapCol and contb > 0 and contb < mapLIn then
+				if cont > 0 and cont < mapCol and contb > 0 and contb < mapLin then
 					console.setcursorposition(cont,contb)
 					console.write(mapBlank)
 				else
@@ -63,7 +63,7 @@ module exemplo
 		pPos = pPosInit
 	end sub
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	sub pegarTecla()
+	sub getKey()
 		cKey = console.readkey
 		if cKey.Key <> ConsoleKey.Spacebar then
 			if cKey.Key = ConsoleKey.LeftArrow then
@@ -83,44 +83,44 @@ module exemplo
 			console.setcursorposition(pPos,pLin)
 			console.write(pChar)
 		else
-			dispararProjetil()
+			fireBullet()
 		end if		
 	end sub
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	sub dispararProjetil()
-		projPos = pLin - 1
-		projCol = pPos
-		console.setcursorposition(projCol,projPos)
-		console.write(projChar)
-		timerProj.start
+	sub fireBullet()
+		bulletPos = pLin - 1
+		bulletCol = pPos
+		console.setcursorposition(bulletCol,bulletPos)
+		console.write(bulletChar)
+		timerBullet.start
 	end sub
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	sub moverProjetil()
-		if projPos > 1 then
-			projPosOld = projPos
-			projPos -= 1
-			console.setcursorposition(projCol,projPosOld)
+	sub moveBullet()
+		if bulletPos > 1 then
+			bulletPosOld = bulletPos
+			bulletPos -= 1
+			console.setcursorposition(bulletCol,bulletPosOld)
 			console.write(mapBlank)
-			console.setcursorposition(projCol,projPos)
-			console.write(projChar)
+			console.setcursorposition(bulletCol,bulletPos)
+			console.write(bulletChar)
 			dim cont as integer
 			for cont = 1 to 10
-				if projPos = inimigo(cont).Pos and projCol = inimigo(cont).Col then
-					inimigo(cont).Atingido = true
-					inimigo(cont).Pos = 0
-					inimigo(cont).Col = 0
-					pontos += 1
-					desenharPontos()
+				if bulletPos = pEnemy(cont).Pos and bulletCol = pEnemy(cont).Col then
+					pEnemy(cont).GotHit = true
+					pEnemy(cont).Pos = 0
+					pEnemy(cont).Col = 0
+					score += 1
+					drawScore()
 				end if
 			next
 		else
-			console.setcursorposition(projCol,projPos)
+			console.setcursorposition(bulletCol,bulletPos)
 			console.write(mapBlank)
-			timerProj.stop
+			timerBullet.stop
 		end if
 	end sub
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	sub inicializarInimigo()
+	sub inicializeEnemy()
 		Randomize()
 		dim cont as integer
 		dim randN as integer
@@ -128,53 +128,53 @@ module exemplo
 		dim matchPos as boolean = false
 		dim tmpCont as integer = 1
 		for cont = 1 to 10
-			inimigo(cont) = new tipoInimigo
+			pEnemy(cont) = new typeEnemy
 			randN = (36 * rnd() + 2)
 			numPos(cont) = randN
-			inimigo(cont).Col = numPos(cont)
-			inimigo(cont).Pos = 2
-			inimigo(cont).Caracter = "W"
+			pEnemy(cont).Col = numPos(cont)
+			pEnemy(cont).Pos = 2
+			pEnemy(cont).EnemyChar = "W"
 		next
 		for cont = 1 to 10
-			console.setcursorposition(inimigo(cont).Col,inimigo(cont).Pos)
-			console.write(inimigo(cont).Caracter)
+			console.setcursorposition(pEnemy(cont).Col,pEnemy(cont).Pos)
+			console.write(pEnemy(cont).EnemyChar)
 		next
-		timerInimigo.start()
+		timerEnemy.start()
 	end sub
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	sub moverInimigo(byval numInimigo as integer)
-		if inimigo(numInimigo).Atingido = false then
-			inimigo(numInimigo).PosOld = inimigo(numInimigo).Pos
-			inimigo(numInimigo).Pos += 1
-			console.setcursorposition(inimigo(numInimigo).col,inimigo(numInimigo).pos)
-			console.write(inimigo(numInimigo).caracter)
-			console.setcursorposition(inimigo(numInimigo).col,inimigo(numInimigo).PosOld)
+	sub moveEnemy(byval enemyIndex as integer)
+		if pEnemy(enemyIndex).GotHit = false then
+			pEnemy(enemyIndex).PosOld = pEnemy(enemyIndex).Pos
+			pEnemy(enemyIndex).Pos += 1
+			console.setcursorposition(pEnemy(enemyIndex).col,pEnemy(enemyIndex).pos)
+			console.write(pEnemy(enemyIndex).EnemyChar)
+			console.setcursorposition(pEnemy(enemyIndex).col,pEnemy(enemyIndex).PosOld)
 			console.write(mapBlank)
 		end if
 	end sub
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	sub loopMoverInimigo()
+	sub loopMoveEnemy()
 		dim cont as integer = 1
 		for cont = 1 to 10
-			moverInimigo(cont)
+			moveEnemy(cont)
 		next
 	end sub
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
 	sub main()		
-		timerProj = new System.Timers.Timer
-		timerProj.interval = 50
-		timerProj.enabled = true
-		AddHandler timerProj.Elapsed, AddressOf moverProjetil
-		timerInimigo = new System.Timers.Timer
-		timerInimigo.interval = 1500
-		timerInimigo.enabled = true
-		AddHandler timerInimigo.Elapsed, AddressOf loopMoverInimigo
-		desenharMapa()
+		timerBullet = new System.Timers.Timer
+		timerBullet.interval = 50
+		timerBullet.enabled = true
+		AddHandler timerBullet.Elapsed, AddressOf moveBullet
+		timerEnemy = new System.Timers.Timer
+		timerEnemy.interval = 1500
+		timerEnemy.enabled = true
+		AddHandler timerEnemy.Elapsed, AddressOf loopMoveEnemy
+		drawMap()
 		inicializarPlayer()
-		inicializarInimigo()
-		while(not saida)
-			pegarTecla()
-				'CONSERTAR CARACTERES VAZIOS NA BORDA DO MAPA
+		inicializeEnemy()
+		while(not exit)
+			getKey()
+				'Fix some empty characters at the border of the map... At least a try...
 				console.setcursorposition(0,0)
 				console.write(mapChar)
 				console.setcursorposition(1,0)
