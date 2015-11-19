@@ -57,7 +57,7 @@ module spaceInvader
 		next
 	end sub
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
-	sub inicializarPlayer()
+	sub inicializePlayer()
 		console.setcursorposition(pPosInit,pLin)
 		console.write(pChar)
 		pPos = pPosInit
@@ -170,7 +170,7 @@ module spaceInvader
 		timerEnemy.enabled = true
 		AddHandler timerEnemy.Elapsed, AddressOf loopMoveEnemy
 		drawMap()
-		inicializarPlayer()
+		inicializePlayer()
 		inicializeEnemy()
 		while(not exit)
 			getKey()
