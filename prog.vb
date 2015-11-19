@@ -2,7 +2,7 @@ imports System.Threading
 module spaceInvader
 #region "Global Variables"
 	dim threadShot as Thread
-	dim exit as boolean = false
+	dim exitBool as boolean = false
 	dim score as integer = 0
 	''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''	
 	dim timerBullet as System.Timers.Timer
@@ -172,7 +172,7 @@ module spaceInvader
 		drawMap()
 		inicializePlayer()
 		inicializeEnemy()
-		while(not exit)
+		while(not exitBool)
 			getKey()
 				'Fix some empty characters at the border of the map... At least a try...
 				console.setcursorposition(0,0)
